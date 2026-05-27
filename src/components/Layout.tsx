@@ -1,11 +1,11 @@
 import { useEffect, useRef, type ReactNode } from "react";
-import { BagIcon, GridIcon, HomeIcon, PinIcon, RewardIcon, ShieldIcon, TruckIcon, UserIcon } from "./Icons";
+import { BagIcon, ChevronLeftIcon, GridIcon, HomeIcon, PinIcon, ShieldIcon, TruckIcon } from "./Icons";
 import { branch } from "../data/mockData";
 import type { Screen } from "../types";
 
 type AppShellProps = {
   children: ReactNode;
-  active: "Home" | "Categories" | "Orders" | "Rewards" | "Profile";
+  active: "Home" | "Categories" | "Cart" | "Orders";
   cartCount: number;
   onNavigate: (screen: Screen) => void;
   sticky?: ReactNode;
@@ -22,8 +22,10 @@ export function AppShell({ children, active, cartCount, onNavigate, sticky, scre
   return (
     <main className="h-dvh overflow-hidden bg-[#EAF2ED] text-savt-ink sm:py-6">
       <section className="mx-auto flex h-full w-full max-w-[430px] flex-col overflow-hidden bg-[#F7FAF8] shadow-2xl sm:h-[880px] sm:rounded-[34px]">
-        <DeliveryHeader />
-        <div ref={scrollRef} className={`relative min-h-0 flex-1 overflow-y-auto overscroll-contain ${sticky ? "pb-8" : "pb-6"}`}>{children}</div>
+        <div ref={scrollRef} className={`no-scrollbar relative min-h-0 flex-1 overflow-y-auto overscroll-contain ${sticky ? "pb-8" : "pb-6"}`}>
+          <DeliveryHeader />
+          {children}
+        </div>
         {sticky}
         <BottomNav active={active} cartCount={cartCount} onNavigate={onNavigate} />
       </section>
@@ -38,9 +40,21 @@ function DeliveryHeader() {
         <span>9:41</span>
         <span>5G 100%</span>
       </div>
-      <div className="mt-4">
+      <div className="mt-4 flex min-h-10 items-center justify-between gap-3">
+        <button
+          type="button"
+          aria-label="Back to SAVT"
+          onClick={() => window.history.back()}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-emerald-100 bg-white text-savt-dark shadow-sm transition active:scale-95"
+        >
+          <ChevronLeftIcon className="h-4 w-4" />
+        </button>
+        <span className="text-[13px] font-black tracking-[0.16em] text-slate-950">CKS GO</span>
+        <span className="w-11" aria-hidden="true" />
+      </div>
+      <div className="mt-3">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2 text-[12px] font-black text-savt-dark">
+          <div className="flex min-w-0 flex-1 items-center gap-2 text-[12px] font-black text-savt-dark">
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-savt-light text-savt-dark">
               <PinIcon className="h-4 w-4" />
             </span>
@@ -70,13 +84,12 @@ function BottomNav({ active, cartCount, onNavigate }: Omit<AppShellProps, "child
   const items = [
     { label: "Home", icon: HomeIcon, action: () => onNavigate("home") },
     { label: "Categories", icon: GridIcon, action: () => onNavigate("listing") },
-    { label: "Orders", icon: BagIcon, action: () => onNavigate("tracking"), count: cartCount },
-    { label: "Rewards", icon: RewardIcon, action: () => onNavigate("home") },
-    { label: "Profile", icon: UserIcon, action: () => onNavigate("home") }
+    { label: "Cart", icon: BagIcon, action: () => onNavigate("cart"), count: cartCount },
+    { label: "Orders", icon: TruckIcon, action: () => onNavigate("tracking") }
   ];
 
   return (
-    <nav className="z-30 grid h-[88px] grid-cols-5 border-t border-slate-100 bg-white/95 px-3 pb-3 pt-2 shadow-nav backdrop-blur-xl">
+    <nav className="z-30 grid h-[88px] grid-cols-4 border-t border-slate-100 bg-white/95 px-4 pb-3 pt-2 shadow-nav backdrop-blur-xl">
       {items.map((item) => {
         const Icon = item.icon;
         const selected = active === item.label;
@@ -93,8 +106,8 @@ function BottomNav({ active, cartCount, onNavigate }: Omit<AppShellProps, "child
             </span>
             <span>{item.label}</span>
             {selected && <span className="absolute bottom-0.5 h-1 w-5 rounded-full bg-savt-green" />}
-            {!!item.count && item.label === "Orders" && (
-              <span className="absolute right-3 top-1 grid h-5 min-w-5 place-items-center rounded-full bg-savt-green px-1 text-[10px] font-black text-white shadow-sm">
+            {!!item.count && item.label === "Cart" && (
+              <span className="absolute right-4 top-1 grid h-5 min-w-5 place-items-center rounded-full bg-savt-green px-1 text-[10px] font-black text-white shadow-sm">
                 {item.count}
               </span>
             )}

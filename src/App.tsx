@@ -125,7 +125,7 @@ export default function App() {
     setScreen(nextScreen);
   };
 
-  const activeNav = screen === "listing" ? "Categories" : ["cart", "checkout", "tracking"].includes(screen) ? "Orders" : "Home";
+  const activeNav = screen === "listing" ? "Categories" : ["cart", "checkout"].includes(screen) ? "Cart" : screen === "tracking" ? "Orders" : "Home";
 
   return (
     <AppShell
@@ -206,7 +206,9 @@ function HomeScreen({
 
   return (
     <div className="space-y-6 px-5 py-4">
-      <SearchBar value={searchQuery} onChange={onSearch} />
+      <div className="sticky top-0 z-30 -mx-5 -mt-4 bg-[#F7FAF8]/95 px-5 pb-3 pt-4 shadow-[0_14px_24px_rgba(15,23,42,0.05)] backdrop-blur-xl">
+        <SearchBar value={searchQuery} onChange={onSearch} />
+      </div>
       {searchQuery.trim() && (
         <SearchResultsPanel query={searchQuery} products={searchResults} onProduct={onProduct} onAdd={onAdd} />
       )}
