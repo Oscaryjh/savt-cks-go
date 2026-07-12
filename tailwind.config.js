@@ -12,11 +12,11 @@ export default {
         }
       },
       boxShadow: {
-        soft: "0 12px 34px rgba(15, 23, 42, 0.07)",
-        card: "0 16px 44px rgba(15, 23, 42, 0.08)",
-        lift: "0 18px 44px rgba(15, 23, 42, 0.12)",
-        button: "0 12px 22px rgba(22, 163, 74, 0.24)",
-        nav: "0 -14px 34px rgba(15, 23, 42, 0.10)"
+        soft: "0 8px 22px rgba(15, 23, 42, 0.055)",
+        card: "0 10px 26px rgba(15, 23, 42, 0.06)",
+        lift: "0 14px 34px rgba(15, 23, 42, 0.10)",
+        button: "0 10px 18px rgba(22, 163, 74, 0.22)",
+        nav: "0 -10px 26px rgba(15, 23, 42, 0.08)"
       },
       fontFamily: {
         sans: [

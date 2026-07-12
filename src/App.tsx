@@ -10,7 +10,7 @@ import {
   weeklyDealsProducts
 } from "./data/mockData";
 import type { CartItem, CartTotals, Product, Screen } from "./types";
-import { AppShell } from "./components/Layout";
+import { AppShell, PhoneFrame } from "./components/Layout";
 import {
   BagIcon,
   BabyIcon,
@@ -29,7 +29,7 @@ import {
   SearchIcon,
   SnackIcon,
   ShieldIcon,
-  TruckIcon
+  TruckIcon,
 } from "./components/Icons";
 import { ProductCard, ProductVisual, ValueTag } from "./components/ProductCard";
 import { QuantitySelector } from "./components/QuantitySelector";
@@ -71,6 +71,7 @@ function findProducts(query: string) {
 }
 
 export default function App() {
+  const [activeModule, setActiveModule] = useState<"cks" | "savt">("cks");
   const [screen, setScreen] = useState<Screen>("home");
   const [selectedCategory, setSelectedCategory] = useState("fresh");
   const [selectedProduct, setSelectedProduct] = useState<Product>(products[0]);
@@ -127,11 +128,23 @@ export default function App() {
 
   const activeNav = screen === "listing" ? "Categories" : ["cart", "checkout"].includes(screen) ? "Cart" : screen === "tracking" ? "Orders" : "Home";
 
+  if (activeModule === "savt") {
+    return (
+      <SavtHomeScreen
+        onOpenCksGo={() => {
+          setScreen("home");
+          setActiveModule("cks");
+        }}
+      />
+    );
+  }
+
   return (
     <AppShell
       active={activeNav}
       cartCount={cartCount}
       onNavigate={navigate}
+      onBack={() => setActiveModule("savt")}
       screenKey={screen}
       sticky={
         screen === "detail" ? (
@@ -188,6 +201,29 @@ export default function App() {
   );
 }
 
+function SavtHomeScreen({ onOpenCksGo }: { onOpenCksGo: () => void }) {
+  return (
+    <PhoneFrame>
+      <section className="relative h-full w-full max-w-[430px] overflow-hidden bg-[#F3FAEE] sm:h-[874px] sm:w-[402px] sm:max-w-[402px] sm:rounded-[48px]">
+        <img
+          src="/assets/savt-home-screenshot.png"
+          alt="SAVT home screen"
+          className="h-full w-full select-none object-fill"
+          draggable={false}
+        />
+        <button
+          type="button"
+          aria-label="Open CKS GO"
+          onClick={onOpenCksGo}
+          className="absolute bottom-[1.4%] left-[70.7%] h-[9.8%] w-[17%] -translate-x-1/2 rounded-[18px] bg-transparent [-webkit-tap-highlight-color:transparent] focus:outline-none"
+        >
+          <span className="sr-only">Open CKS GO</span>
+        </button>
+      </section>
+    </PhoneFrame>
+  );
+}
+
 function HomeScreen({
   searchQuery,
   onSearch,
@@ -205,8 +241,8 @@ function HomeScreen({
   const searchResults = findProducts(searchQuery).slice(0, 4);
 
   return (
-    <div className="space-y-6 px-5 py-4">
-      <div className="sticky top-0 z-30 -mx-5 -mt-4 bg-[#F7FAF8]/95 px-5 pb-3 pt-4 shadow-[0_14px_24px_rgba(15,23,42,0.05)] backdrop-blur-xl">
+    <div className="space-y-4 px-4 py-3">
+      <div className="sticky top-0 z-30 -mx-4 -mt-3 bg-[#F7FAF8]/95 px-4 pb-2.5 pt-3 shadow-[0_12px_22px_rgba(15,23,42,0.045)] backdrop-blur-xl">
         <SearchBar value={searchQuery} onChange={onSearch} />
       </div>
       {searchQuery.trim() && (
@@ -216,7 +252,7 @@ function HomeScreen({
       <TrustStrip />
       <SavingsStrip />
       <SectionHeader title="Shop supermarket aisles" action="View all" />
-      <div className="no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+      <div className="no-scrollbar -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1">
         {categories.map((category) => {
           const visual = categoryVisual(category.id);
           const Icon = visual.Icon;
@@ -224,13 +260,13 @@ function HomeScreen({
             <button
               key={category.id}
               onClick={() => onCategory(category.id)}
-              className="flex min-h-[104px] w-[82px] shrink-0 flex-col items-center justify-center gap-2 rounded-[24px] border border-white/80 bg-white p-2 shadow-card transition active:scale-95"
+              className="flex min-h-[86px] w-[72px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-[20px] border border-white/80 bg-white p-2 shadow-card transition active:scale-95"
             >
-              <span className={`relative grid h-12 w-12 place-items-center overflow-hidden rounded-[18px] ${visual.bg} ${visual.text} ring-1 ${visual.ring}`}>
-                <span className="absolute left-2 top-1 h-3 w-7 rounded-full bg-white/70" />
-                <Icon className="relative h-6 w-6" />
+              <span className={`relative grid h-10 w-10 place-items-center overflow-hidden rounded-[15px] ${visual.bg} ${visual.text} ring-1 ${visual.ring}`}>
+                <span className="absolute left-2 top-1 h-2.5 w-6 rounded-full bg-white/70" />
+                <Icon className="relative h-5 w-5" />
               </span>
-              <span className="text-center text-[11px] font-black leading-3 text-slate-700">{category.name}</span>
+              <span className="text-center text-[10.5px] font-black leading-3 text-slate-700">{category.name}</span>
             </button>
           );
         })}
@@ -559,7 +595,7 @@ function SearchBar({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className={`flex min-h-[52px] items-center gap-3 rounded-[20px] border border-white/80 bg-white px-4 text-slate-400 shadow-card ${compact ? "min-w-0 flex-1" : ""}`}>
+    <label className={`flex min-h-[46px] items-center gap-2.5 rounded-[18px] border border-white/80 bg-white px-3.5 text-slate-400 shadow-card ${compact ? "min-w-0 flex-1" : ""}`}>
       <SearchIcon className="h-5 w-5 shrink-0" />
       <input
         value={value}
@@ -695,26 +731,26 @@ function PromotionBanner() {
   const heroProducts = [products[0], products[1], products[3]];
 
   return (
-    <div className="relative min-h-[196px] overflow-hidden rounded-[32px] bg-[#123D27] p-5 text-white shadow-lift">
-      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/15 to-transparent" />
-      <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-savt-green/20 blur-2xl" />
-      <div className="relative z-10 max-w-[58%]">
-        <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-[10px] font-black text-emerald-50 backdrop-blur">
+    <div className="relative min-h-[154px] overflow-hidden rounded-[26px] bg-[#123D27] p-4 text-white shadow-lift">
+      <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/15 to-transparent" />
+      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-savt-green/20 blur-2xl" />
+      <div className="relative z-10 max-w-[62%]">
+        <span className="inline-flex rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-black text-emerald-50 backdrop-blur">
           CKS GO Supermarket Week
         </span>
-        <p className="mt-3 text-[24px] font-black leading-[29px]">Stock up and save more</p>
-        <p className="mt-2 text-[12px] font-semibold leading-[17px] text-emerald-100">Fresh picks, member prices and SAVT rewards.</p>
+        <p className="mt-2.5 text-[21px] font-black leading-[25px]">Stock up and save more</p>
+        <p className="mt-1.5 text-[11px] font-semibold leading-4 text-emerald-100">Fresh picks, member prices and SAVT rewards.</p>
       </div>
-      <div className="absolute bottom-4 right-4 w-[116px] rounded-[28px] bg-white/95 p-2.5 shadow-lift">
-        <div className="grid grid-cols-2 gap-1.5">
+      <div className="absolute bottom-3 right-3 w-[98px] rounded-[22px] bg-white/95 p-2 shadow-lift">
+        <div className="grid grid-cols-2 gap-1">
           {heroProducts.map((product) => (
-            <div key={product.id} className="grid h-[46px] place-items-center overflow-hidden rounded-2xl bg-slate-50">
+            <div key={product.id} className="grid h-[38px] place-items-center overflow-hidden rounded-xl bg-slate-50">
               <ProductVisual product={product} size="cart" />
             </div>
           ))}
-          <div className="grid h-[46px] place-items-center rounded-2xl bg-savt-light text-[11px] font-black text-savt-dark">CKS</div>
+          <div className="grid h-[38px] place-items-center rounded-xl bg-savt-light text-[10px] font-black text-savt-dark">CKS</div>
         </div>
-        <div className="mt-2 rounded-2xl bg-savt-light px-2 py-1 text-center text-[10px] font-black text-savt-dark">
+        <div className="mt-1.5 rounded-xl bg-savt-light px-2 py-0.5 text-center text-[9px] font-black text-savt-dark">
           30-45 mins
         </div>
       </div>
@@ -724,7 +760,7 @@ function PromotionBanner() {
 
 function TrustStrip() {
   return (
-    <div className="grid grid-cols-3 gap-2.5">
+    <div className="grid grid-cols-3 gap-2">
       <TrustItem icon={<PinIcon className="h-4 w-4" />} label="Nearest CKS" value="Lintas" />
       <TrustItem icon={<TruckIcon className="h-4 w-4" />} label="ETA" value="30-45m" />
       <TrustItem icon={<ShieldIcon className="h-4 w-4" />} label="Packed" value="Carefully" />
@@ -734,34 +770,34 @@ function TrustStrip() {
 
 function TrustItem({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-[22px] border border-white/80 bg-white p-3 shadow-soft">
-      <div className="grid h-9 w-9 place-items-center rounded-2xl bg-savt-light text-savt-dark">
+    <div className="rounded-[18px] border border-white/80 bg-white p-2.5 shadow-soft">
+      <div className="grid h-8 w-8 place-items-center rounded-[14px] bg-savt-light text-savt-dark">
         {icon}
       </div>
-      <p className="mt-2 text-[10px] font-bold text-slate-400">{label}</p>
-      <p className="text-[12px] font-black text-slate-950">{value}</p>
+      <p className="mt-1.5 text-[9.5px] font-bold text-slate-400">{label}</p>
+      <p className="text-[11.5px] font-black text-slate-950">{value}</p>
     </div>
   );
 }
 
 function SavingsStrip() {
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <div className="rounded-[24px] border border-emerald-100 bg-white p-4 shadow-soft">
+    <div className="grid grid-cols-2 gap-2.5">
+      <div className="rounded-[20px] border border-emerald-100 bg-white p-3.5 shadow-soft">
         <div className="flex items-center gap-2 text-savt-dark">
-          <PercentBadgeIcon className="h-5 w-5" />
-          <span className="text-xs font-black uppercase tracking-[0.12em]">Cashback</span>
+          <PercentBadgeIcon className="h-4 w-4" />
+          <span className="text-[11px] font-black uppercase tracking-[0.12em]">Cashback</span>
         </div>
-        <p className="mt-2 text-2xl font-black text-slate-950">8%</p>
-        <p className="text-xs font-semibold text-slate-500">on member picks</p>
+        <p className="mt-1.5 text-[22px] font-black leading-none text-slate-950">8%</p>
+        <p className="mt-1 text-[11.5px] font-semibold text-slate-500">on member picks</p>
       </div>
-      <div className="rounded-[24px] border border-amber-100 bg-white p-4 shadow-soft">
+      <div className="rounded-[20px] border border-amber-100 bg-white p-3.5 shadow-soft">
         <div className="flex items-center gap-2 text-amber-700">
-          <CoinIcon className="h-5 w-5" />
-          <span className="text-xs font-black uppercase tracking-[0.12em]">SAVT Points</span>
+          <CoinIcon className="h-4 w-4" />
+          <span className="text-[11px] font-black uppercase tracking-[0.12em]">SAVT Points</span>
         </div>
-        <p className="mt-2 text-2xl font-black text-slate-950">+120</p>
-        <p className="text-xs font-semibold text-slate-500">typical fresh order</p>
+        <p className="mt-1.5 text-[22px] font-black leading-none text-slate-950">+120</p>
+        <p className="mt-1 text-[11.5px] font-semibold text-slate-500">typical fresh order</p>
       </div>
     </div>
   );
@@ -800,12 +836,12 @@ function RewardMetric({ icon, label, value }: { icon: ReactNode; label: string; 
 
 function SectionHeader({ title, action }: { title: string; action?: string }) {
   return (
-    <div className="flex min-h-11 items-center justify-between">
+    <div className="flex min-h-8 items-center justify-between">
       <div>
-        <h2 className="text-[19px] font-black leading-6 text-slate-950">{title}</h2>
+        <h2 className="text-[17px] font-extrabold leading-6 tracking-[-0.01em] text-slate-950">{title}</h2>
       </div>
       {action && (
-        <button className="grid min-h-11 min-w-11 place-items-center rounded-full px-3 text-xs font-black text-savt-dark transition active:bg-savt-light">
+        <button className="grid min-h-9 min-w-9 place-items-center rounded-full px-2.5 text-[10.5px] font-extrabold text-savt-dark transition active:bg-savt-light">
           {action}
         </button>
       )}
@@ -815,7 +851,7 @@ function SectionHeader({ title, action }: { title: string; action?: string }) {
 
 function ProductGrid({ products: items, onProduct, onAdd }: { products: Product[]; onProduct: (product: Product) => void; onAdd: (product: Product) => void }) {
   return (
-    <div className="grid grid-cols-2 gap-3.5">
+    <div className="grid grid-cols-2 gap-2.5">
       {items.map((product) => (
         <ProductCard key={product.id} product={product} onOpen={onProduct} onAdd={onAdd} />
       ))}

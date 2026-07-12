@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { BagIcon, ChevronLeftIcon, GridIcon, HomeIcon, PinIcon, ShieldIcon, TruckIcon } from "./Icons";
 import { branch } from "../data/mockData";
 import type { Screen } from "../types";
@@ -8,11 +8,65 @@ type AppShellProps = {
   active: "Home" | "Categories" | "Cart" | "Orders";
   cartCount: number;
   onNavigate: (screen: Screen) => void;
+  onBack: () => void;
   sticky?: ReactNode;
   screenKey?: string;
 };
 
-export function AppShell({ children, active, cartCount, onNavigate, sticky, screenKey }: AppShellProps) {
+type PhoneFrameProps = {
+  children: ReactNode;
+};
+
+function getPhonePreviewScale() {
+  if (typeof window === "undefined" || !window.matchMedia("(min-width: 640px)").matches) {
+    return 1;
+  }
+
+  const horizontalScale = (window.innerWidth - 40) / 430;
+  const verticalScale = (window.innerHeight - 96) / 902;
+  return Math.min(horizontalScale, verticalScale, 1);
+}
+
+export function PhoneFrame({ children }: PhoneFrameProps) {
+  const [previewScale, setPreviewScale] = useState(getPhonePreviewScale);
+
+  useLayoutEffect(() => {
+    const updateScale = () => {
+      setPreviewScale(getPhonePreviewScale());
+    };
+
+    updateScale();
+    window.addEventListener("resize", updateScale);
+    return () => window.removeEventListener("resize", updateScale);
+  }, []);
+
+  return (
+    <main className="grid h-dvh overflow-hidden bg-[#EAF2ED] text-savt-ink sm:place-items-center sm:p-4">
+      <div
+        style={
+          {
+            "--iphone-preview-scale": previewScale,
+            width: "calc(430px * var(--iphone-preview-scale))",
+            height: "calc(902px * var(--iphone-preview-scale))"
+          } as CSSProperties
+        }
+        className="contents sm:block"
+      >
+        <div className="relative flex h-full w-full max-w-[430px] bg-[#F7FAF8] shadow-2xl sm:h-[902px] sm:w-[430px] sm:max-w-none sm:origin-top-left sm:rounded-[58px] sm:bg-slate-950 sm:p-[10px] sm:shadow-[0_28px_80px_rgba(15,23,42,0.26)] sm:ring-1 sm:ring-white/20 sm:[transform:scale(var(--iphone-preview-scale))]">
+          <div className="pointer-events-none absolute inset-x-0 top-[5px] z-40 hidden justify-center sm:flex">
+            <div className="h-[35px] w-[126px] rounded-full bg-black shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]" />
+          </div>
+          <div className="pointer-events-none absolute right-[5px] top-[140px] hidden h-[86px] w-[4px] rounded-r-full bg-slate-900 sm:block" />
+          <div className="pointer-events-none absolute left-[5px] top-[132px] hidden h-[54px] w-[4px] rounded-l-full bg-slate-900 sm:block" />
+          <div className="pointer-events-none absolute left-[5px] top-[208px] hidden h-[78px] w-[4px] rounded-l-full bg-slate-900 sm:block" />
+          {children}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export function AppShell({ children, active, cartCount, onNavigate, onBack, sticky, screenKey }: AppShellProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,67 +74,73 @@ export function AppShell({ children, active, cartCount, onNavigate, sticky, scre
   }, [screenKey]);
 
   return (
-    <main className="h-dvh overflow-hidden bg-[#EAF2ED] text-savt-ink sm:py-6">
-      <section className="mx-auto flex h-full w-full max-w-[430px] flex-col overflow-hidden bg-[#F7FAF8] shadow-2xl sm:h-[880px] sm:rounded-[34px]">
+    <PhoneFrame>
+      <section className="relative flex h-full w-full max-w-[430px] flex-col overflow-hidden bg-[#F7FAF8] sm:h-[874px] sm:w-[402px] sm:max-w-[402px] sm:rounded-[48px] sm:pt-5">
         <div ref={scrollRef} className={`no-scrollbar relative min-h-0 flex-1 overflow-y-auto overscroll-contain ${sticky ? "pb-8" : "pb-6"}`}>
-          <DeliveryHeader />
+          <DeliveryHeader onBack={onBack} />
           {children}
         </div>
         {sticky}
         <BottomNav active={active} cartCount={cartCount} onNavigate={onNavigate} />
       </section>
-    </main>
+    </PhoneFrame>
   );
 }
 
-function DeliveryHeader() {
+function DeliveryHeader({ onBack }: { onBack: () => void }) {
   return (
-    <header className="z-20 border-b border-slate-100/80 bg-white/95 px-5 pb-4 pt-3 shadow-[0_8px_26px_rgba(15,23,42,0.04)] backdrop-blur-xl">
+    <header className="z-20 border-b border-slate-100/80 bg-white/95 px-4 pb-3 pt-3 shadow-[0_8px_22px_rgba(15,23,42,0.035)] backdrop-blur-xl">
       <div className="flex items-center justify-between text-xs font-semibold text-slate-900">
         <span>9:41</span>
         <span>5G 100%</span>
       </div>
-      <div className="mt-4 flex min-h-10 items-center justify-between gap-3">
+      <div className="mt-3 flex min-h-10 items-center justify-between gap-3">
         <button
           type="button"
           aria-label="Back to SAVT"
-          onClick={() => window.history.back()}
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-emerald-100 bg-white text-savt-dark shadow-sm transition active:scale-95"
+          onClick={onBack}
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-emerald-100 bg-white text-savt-dark shadow-sm transition active:scale-95"
         >
           <ChevronLeftIcon className="h-4 w-4" />
         </button>
         <span className="text-[13px] font-black tracking-[0.16em] text-slate-950">CKS GO</span>
         <span className="w-11" aria-hidden="true" />
       </div>
-      <div className="mt-3">
+      <div className="mt-2.5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-2 text-[12px] font-black text-savt-dark">
-            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-savt-light text-savt-dark">
-              <PinIcon className="h-4 w-4" />
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-savt-light text-savt-dark">
+              <PinIcon className="h-3.5 w-3.5" />
             </span>
             <span className="truncate">Delivering from {branch.name}</span>
           </div>
-          <div className="grid min-h-9 shrink-0 place-items-center rounded-full border border-emerald-100 bg-savt-light px-3 text-xs font-black text-savt-dark shadow-sm">
+          <div className="grid min-h-8 shrink-0 place-items-center rounded-full border border-emerald-100 bg-savt-light px-3 text-[11.5px] font-black text-savt-dark shadow-sm">
             {branch.eta}
           </div>
         </div>
-        <button className="mt-1 flex min-h-11 max-w-full items-center text-left text-[18px] font-black leading-6 text-slate-950">
+        <button className="mt-1 flex min-h-9 max-w-full items-center text-left text-[17px] font-black leading-5 text-slate-950">
           <span className="truncate">Deliver to {branch.address}</span>
         </button>
-        <div className="flex items-center gap-2 text-[12px] font-semibold text-slate-500">
+        <div className="flex items-center gap-2 text-[11.5px] font-semibold text-slate-500">
           <ShieldIcon className="h-3.5 w-3.5 text-savt-dark" />
           <span>{branch.note}</span>
         </div>
       </div>
-      <div className="mt-3 flex items-center gap-2 rounded-2xl bg-slate-50 px-3 py-2 text-[11px] font-bold text-slate-600">
-        <TruckIcon className="h-4 w-4 text-savt-dark" />
-        <span>Nearest branch assigned automatically. Change address anytime.</span>
+      <div className="mt-2 flex items-center gap-2 rounded-[14px] bg-slate-50 px-2.5 py-1 text-[10px] font-bold leading-3 text-slate-600">
+        <TruckIcon className="h-3.5 w-3.5 shrink-0 text-savt-dark" />
+        <span className="truncate">Nearest branch assigned automatically. Change address anytime.</span>
       </div>
     </header>
   );
 }
 
-function BottomNav({ active, cartCount, onNavigate }: Omit<AppShellProps, "children" | "sticky">) {
+type BottomNavProps = {
+  active: AppShellProps["active"];
+  cartCount: number;
+  onNavigate: (screen: Screen) => void;
+};
+
+function BottomNav({ active, cartCount, onNavigate }: BottomNavProps) {
   const items = [
     { label: "Home", icon: HomeIcon, action: () => onNavigate("home") },
     { label: "Categories", icon: GridIcon, action: () => onNavigate("listing") },

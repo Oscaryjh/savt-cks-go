@@ -53,6 +53,24 @@ export function RewardIcon({ className = "h-5 w-5" }: IconProps) {
   );
 }
 
+export function BellIcon({ className = "h-5 w-5" }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M18 10.4c0-3.6-2.4-6.4-6-6.4s-6 2.8-6 6.4v3.3L4.5 17h15L18 13.7v-3.3Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M9.5 19a2.7 2.7 0 0 0 5 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function QrIcon({ className = "h-5 w-5" }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M5 5h5v5H5V5ZM14 5h5v5h-5V5ZM5 14h5v5H5v-5Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M14 14h2.5v2.5H19M14 19h5M19 14v1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function UserIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">

@@ -12,46 +12,46 @@ export function ProductCard({ product, onOpen, onAdd }: ProductCardProps) {
   const savings = Math.max(0, product.originalPrice - product.memberPrice);
 
   return (
-    <article className="group flex min-h-[306px] flex-col overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-card transition duration-200 active:scale-[0.985]">
-      <button onClick={() => onOpen(product)} className="block w-full p-2.5 text-left">
-        <div className={`relative grid h-[132px] place-items-center overflow-hidden rounded-[24px] bg-gradient-to-br ${product.color}`}>
-          <div className="absolute inset-x-4 bottom-3 h-5 rounded-full bg-slate-900/10 blur-sm" />
+    <article className="group relative min-h-[226px] rounded-[18px] bg-white/75 p-1.5 transition duration-200 active:scale-[0.985]">
+      <button onClick={() => onOpen(product)} className="block w-full text-left">
+        <div className={`relative grid h-[118px] place-items-center overflow-hidden rounded-[18px] bg-gradient-to-br ${product.color}`}>
+          <div className="absolute inset-x-5 bottom-2 h-4 rounded-full bg-slate-900/10 blur-sm" />
           {product.badge && (
-            <span className="absolute left-2 top-2 z-20 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold text-savt-dark shadow-sm backdrop-blur">
+            <span className="absolute left-2 top-2 z-10 max-w-[86px] truncate rounded-full bg-white/90 px-2 py-0.5 text-[8.5px] font-extrabold text-savt-dark shadow-sm backdrop-blur">
               {product.badge}
             </span>
           )}
-          <span className="absolute right-2 top-2 z-20 rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-black text-white shadow-sm">
-            Save RM{savings.toFixed(0)}
-          </span>
           <ProductVisual product={product} size="card" />
         </div>
-        <div className="mt-3 min-h-[50px]">
-          <h3 className="line-clamp-2 text-[14px] font-black leading-[18px] text-slate-950">
-            {product.name}
-          </h3>
-          <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{product.unit}</p>
-        </div>
-        <div className="mt-2 rounded-[18px] bg-slate-50 px-3 py-2">
-          <p className="text-[9px] font-black uppercase tracking-[0.12em] text-savt-dark">Member price</p>
-          <div className="mt-0.5 flex items-baseline gap-1.5">
-            <span className="text-[18px] font-black leading-none text-slate-950">RM {product.memberPrice.toFixed(2)}</span>
-            <span className="text-[10px] font-bold text-slate-400 line-through">
-              RM {product.originalPrice.toFixed(2)}
+        {savings > 0 && (
+          <div className="-mt-4 mb-2 grid h-[18px] place-items-center rounded-b-[18px] bg-savt-green text-[9.5px] font-black text-white">
+            RM{savings.toFixed(2)} off
+          </div>
+        )}
+        <div className="px-1.5">
+          <div className="mt-2 flex items-end gap-1.5">
+            <span className="pb-[1px] text-[10px] font-black leading-none text-slate-950">RM</span>
+            <span className="text-[16.5px] font-black leading-[18px] tracking-[-0.01em] text-slate-950">{product.memberPrice.toFixed(2)}</span>
+            <span className="pb-[1px] text-[10px] font-medium text-slate-400 line-through">
+              {product.originalPrice.toFixed(2)}
             </span>
           </div>
-        </div>
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          <ValueTag tone="points">+{product.points} pts</ValueTag>
-          <ValueTag tone="cashback">{product.cashback}% back</ValueTag>
+          <h3 className="mt-1.5 line-clamp-2 min-h-8 text-[12.5px] font-extrabold leading-4 tracking-[-0.005em] text-slate-950">
+            {product.name}
+          </h3>
+          <p className="mt-0.5 truncate text-[10.5px] font-medium leading-4 text-slate-500">{product.unit}</p>
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            <ValueTag tone="points">+{product.points} pts</ValueTag>
+            <ValueTag tone="cashback">{product.cashback}% back</ValueTag>
+          </div>
         </div>
       </button>
       <button
         onClick={() => onAdd(product)}
-        className="mx-2.5 mb-2.5 mt-auto flex h-11 items-center justify-center gap-1.5 rounded-[18px] bg-savt-green text-sm font-black text-white shadow-button transition active:scale-[0.98]"
+        className="absolute right-1.5 top-1.5 z-20 grid h-11 w-11 place-items-center rounded-full bg-savt-dark text-white shadow-button ring-4 ring-white/90 transition active:scale-95"
+        aria-label={`Add ${product.name}`}
       >
-        <PlusIcon className="h-4 w-4" />
-        Add
+        <PlusIcon className="h-[18px] w-[18px]" />
       </button>
     </article>
   );
@@ -67,22 +67,22 @@ export function ValueTag({ children, tone }: { children: ReactNode; tone: "point
   const Icon = tone === "cashback" ? PercentBadgeIcon : tone === "points" ? CoinIcon : undefined;
 
   return (
-    <span className={`inline-flex min-h-[24px] items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-black ${styles[tone]}`}>
-      {Icon && <Icon className="h-3 w-3" />}
+    <span className={`inline-flex min-h-5 items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[8.8px] font-black leading-none ${styles[tone]}`}>
+      {Icon && <Icon className="h-2.5 w-2.5" />}
       {children}
     </span>
   );
 }
 
 export function ProductVisual({ product, size = "detail" }: { product: Product; size?: "card" | "detail" | "cart" }) {
-  const scale = size === "detail" ? "h-40 w-40" : size === "cart" ? "h-16 w-16" : "h-24 w-24";
+  const scale = size === "detail" ? "h-40 w-40" : size === "cart" ? "h-16 w-16" : "h-[92px] w-[92px]";
   const productScale = size === "detail" ? "scale-125" : size === "cart" ? "scale-75" : "scale-100";
   const imageClass =
     size === "detail"
       ? "h-[168px] w-[168px] rounded-[34px]"
       : size === "cart"
         ? "h-[66px] w-[66px] rounded-[18px]"
-        : "h-[98px] w-[98px] rounded-[24px]";
+        : "h-[92px] w-[92px] rounded-[18px]";
 
   if (product.imageUrl) {
     return (
