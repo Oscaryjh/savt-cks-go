@@ -43,7 +43,7 @@ export function PhoneFrame({ children }: PhoneFrameProps) {
   }, []);
 
   return (
-    <main className="grid h-dvh overflow-hidden bg-[#EAF2ED] text-savt-ink sm:place-items-center sm:p-4">
+    <main className="grid h-dvh w-full max-w-full overflow-hidden bg-[#EAF2ED] text-savt-ink sm:place-items-center sm:p-4">
       <div
         style={
           {
@@ -54,7 +54,7 @@ export function PhoneFrame({ children }: PhoneFrameProps) {
         }
         className="contents sm:block"
       >
-        <div className="relative flex h-full w-full max-w-[430px] bg-[#F7FAF8] shadow-2xl sm:h-[902px] sm:w-[430px] sm:max-w-none sm:origin-top-left sm:rounded-[58px] sm:bg-slate-950 sm:p-[10px] sm:shadow-[0_28px_80px_rgba(15,23,42,0.26)] sm:ring-1 sm:ring-white/20 sm:[transform:scale(var(--iphone-preview-scale))]">
+        <div className="relative flex h-dvh min-h-0 w-full min-w-0 max-w-full bg-[#F7FAF8] shadow-2xl sm:h-[902px] sm:w-[430px] sm:max-w-none sm:origin-top-left sm:rounded-[58px] sm:bg-slate-950 sm:p-[10px] sm:shadow-[0_28px_80px_rgba(15,23,42,0.26)] sm:ring-1 sm:ring-white/20 sm:[transform:scale(var(--iphone-preview-scale))]">
           <div className="pointer-events-none absolute inset-x-0 top-[5px] z-40 hidden justify-center sm:flex">
             <div className="h-[35px] w-[126px] rounded-full bg-black shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]" />
           </div>
@@ -87,8 +87,8 @@ export function AppShell({
 
   return (
     <PhoneFrame>
-      <section className="relative flex h-full w-full max-w-[430px] flex-col overflow-hidden bg-[#F7FAF8] sm:h-[874px] sm:w-[402px] sm:max-w-[402px] sm:rounded-[48px] sm:pt-5">
-        <div ref={scrollRef} className={`no-scrollbar relative min-h-0 flex-1 overflow-y-auto overscroll-contain ${sticky ? "pb-8" : "pb-6"}`}>
+      <section className="relative flex h-dvh min-h-0 w-full min-w-0 max-w-full flex-col overflow-hidden bg-[#F7FAF8] sm:h-[874px] sm:w-[402px] sm:max-w-[402px] sm:rounded-[48px] sm:pt-5">
+        <div ref={scrollRef} className={`app-scroll no-scrollbar relative min-h-0 flex-1 overflow-y-auto overscroll-contain ${sticky ? "pb-8" : "pb-6"}`}>
           {headerVariant === "detail" ? (
             <DetailHeader onBack={onBack} backLabel={backLabel} />
           ) : (
