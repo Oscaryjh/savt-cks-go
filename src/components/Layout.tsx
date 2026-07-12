@@ -9,6 +9,8 @@ type AppShellProps = {
   cartCount: number;
   onNavigate: (screen: Screen) => void;
   onBack: () => void;
+  backLabel?: string;
+  headerVariant?: "delivery" | "detail";
   sticky?: ReactNode;
   screenKey?: string;
 };
@@ -66,7 +68,17 @@ export function PhoneFrame({ children }: PhoneFrameProps) {
   );
 }
 
-export function AppShell({ children, active, cartCount, onNavigate, onBack, sticky, screenKey }: AppShellProps) {
+export function AppShell({
+  children,
+  active,
+  cartCount,
+  onNavigate,
+  onBack,
+  backLabel = "Back",
+  headerVariant = "delivery",
+  sticky,
+  screenKey
+}: AppShellProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -77,7 +89,11 @@ export function AppShell({ children, active, cartCount, onNavigate, onBack, stic
     <PhoneFrame>
       <section className="relative flex h-full w-full max-w-[430px] flex-col overflow-hidden bg-[#F7FAF8] sm:h-[874px] sm:w-[402px] sm:max-w-[402px] sm:rounded-[48px] sm:pt-5">
         <div ref={scrollRef} className={`no-scrollbar relative min-h-0 flex-1 overflow-y-auto overscroll-contain ${sticky ? "pb-8" : "pb-6"}`}>
-          <DeliveryHeader onBack={onBack} />
+          {headerVariant === "detail" ? (
+            <DetailHeader onBack={onBack} backLabel={backLabel} />
+          ) : (
+            <DeliveryHeader onBack={onBack} backLabel={backLabel} />
+          )}
           {children}
         </div>
         {sticky}
@@ -87,7 +103,36 @@ export function AppShell({ children, active, cartCount, onNavigate, onBack, stic
   );
 }
 
-function DeliveryHeader({ onBack }: { onBack: () => void }) {
+function DetailHeader({ onBack, backLabel }: { onBack: () => void; backLabel: string }) {
+  return (
+    <header className="z-20 bg-white px-4 pb-2.5 pt-3">
+      <div className="flex items-center justify-between text-xs font-semibold text-slate-900">
+        <span>9:41</span>
+        <span>5G 100%</span>
+      </div>
+      <div className="mt-3 flex min-h-11 items-center justify-between gap-3">
+        <button
+          type="button"
+          aria-label={backLabel}
+          onClick={onBack}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-slate-950 transition active:scale-95"
+        >
+          <ChevronLeftIcon className="h-5 w-5" />
+        </button>
+        <span className="text-[12px] font-black tracking-[0.18em] text-slate-950">CKS GO</span>
+        <button
+          type="button"
+          aria-label="More product options"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-[22px] font-black leading-none text-slate-950 transition active:scale-95"
+        >
+          ...
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function DeliveryHeader({ onBack, backLabel }: { onBack: () => void; backLabel: string }) {
   return (
     <header className="z-20 border-b border-slate-100/80 bg-white/95 px-4 pb-3 pt-3 shadow-[0_8px_22px_rgba(15,23,42,0.035)] backdrop-blur-xl">
       <div className="flex items-center justify-between text-xs font-semibold text-slate-900">
@@ -97,7 +142,7 @@ function DeliveryHeader({ onBack }: { onBack: () => void }) {
       <div className="mt-3 flex min-h-10 items-center justify-between gap-3">
         <button
           type="button"
-          aria-label="Back to SAVT"
+          aria-label={backLabel}
           onClick={onBack}
           className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-emerald-100 bg-white text-savt-dark shadow-sm transition active:scale-95"
         >

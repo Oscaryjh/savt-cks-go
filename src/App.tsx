@@ -1,5 +1,6 @@
 import { type ReactNode, useMemo, useState } from "react";
 import {
+  branch,
   buyAgainProducts,
   categories,
   flashSaleProducts,
@@ -78,6 +79,7 @@ export default function App() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [voucherApplied, setVoucherApplied] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [detailQuantity, setDetailQuantity] = useState(1);
 
   const totals = useMemo(() => {
     const subtotal = cart.reduce((sum, item) => sum + item.product.memberPrice * item.quantity, 0);
@@ -90,13 +92,13 @@ export default function App() {
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, quantity = 1) => {
     setCart((current) => {
       const existing = current.find((item) => item.product.id === product.id);
       if (existing) {
-        return current.map((item) => (item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
+        return current.map((item) => (item.product.id === product.id ? { ...item, quantity: item.quantity + quantity } : item));
       }
-      return [...current, { product, quantity: 1 }];
+      return [...current, { product, quantity }];
     });
   };
 
@@ -110,6 +112,7 @@ export default function App() {
 
   const openProduct = (product: Product) => {
     setSelectedProduct(product);
+    setDetailQuantity(1);
     setScreen("detail");
   };
 
@@ -124,6 +127,30 @@ export default function App() {
       setSearchQuery("");
     }
     setScreen(nextScreen);
+  };
+
+  const handleBack = () => {
+    if (screen === "home") {
+      setActiveModule("savt");
+      return;
+    }
+
+    if (screen === "detail") {
+      setScreen("listing");
+      return;
+    }
+
+    if (screen === "checkout") {
+      setScreen("cart");
+      return;
+    }
+
+    if (screen === "tracking") {
+      setScreen("home");
+      return;
+    }
+
+    setScreen("home");
   };
 
   const activeNav = screen === "listing" ? "Categories" : ["cart", "checkout"].includes(screen) ? "Cart" : screen === "tracking" ? "Orders" : "Home";
@@ -144,15 +171,19 @@ export default function App() {
       active={activeNav}
       cartCount={cartCount}
       onNavigate={navigate}
-      onBack={() => setActiveModule("savt")}
+      onBack={handleBack}
+      backLabel={screen === "home" ? "Back to SAVT" : "Back"}
+      headerVariant={screen === "detail" ? "detail" : "delivery"}
       screenKey={screen}
       sticky={
         screen === "detail" ? (
-          <StickyCta
-            label={`Add to cart - ${currency(selectedProduct.memberPrice)}`}
-            sublabel={`Earn ${selectedProduct.points} pts + ${selectedProduct.cashback}% cashback`}
+          <DetailStickyCta
+            quantity={detailQuantity}
+            total={selectedProduct.memberPrice * detailQuantity}
+            onDecrement={() => setDetailQuantity((current) => Math.max(1, current - 1))}
+            onIncrement={() => setDetailQuantity((current) => current + 1)}
             onClick={() => {
-              addToCart(selectedProduct);
+              addToCart(selectedProduct, detailQuantity);
               setScreen("cart");
             }}
           />
@@ -366,47 +397,107 @@ function ListingScreen({
 }
 
 function ProductDetail({ product, onProduct, onAdd }: { product: Product; onProduct: (product: Product) => void; onAdd: (product: Product) => void }) {
+  const suggestedProducts = products.filter((item) => item.id !== product.id).slice(0, 2);
+
   return (
-    <div>
-      <div className={`relative grid h-[268px] place-items-center overflow-hidden bg-gradient-to-br ${product.color}`}>
-        <div className="absolute left-5 top-5 rounded-full bg-white/80 px-3 py-1.5 text-[11px] font-black text-savt-dark shadow-sm">
-          CKS GO fresh packed
+    <div className="bg-white">
+      <section className="bg-white px-2 pb-5 pt-1">
+        <div className="relative grid min-h-[286px] w-full place-items-center overflow-hidden">
+          <ProductVisual product={product} size="detail" />
         </div>
-        <div className="absolute bottom-7 h-10 w-48 rounded-full bg-slate-950/10 blur-xl" />
-        <ProductVisual product={product} size="detail" />
-      </div>
-      <div className="-mt-7 space-y-5 rounded-t-[32px] bg-white px-5 pb-6 pt-6 shadow-soft">
+      </section>
+
+      <section className="space-y-5 border-t border-slate-100 bg-white px-5 pb-6 pt-5">
         <div>
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            <ValueTag tone="member">Member price</ValueTag>
-            <ValueTag tone="cashback">{product.cashback}% cashback</ValueTag>
-            <ValueTag tone="points">+{product.points} pts</ValueTag>
+          <div className="flex items-end gap-2">
+            <span className="text-[28px] font-black leading-none tracking-[-0.015em] text-slate-950">{currency(product.memberPrice)}</span>
+            <span className="pb-1 text-[13px] font-semibold text-slate-400 line-through">{currency(product.originalPrice)}</span>
           </div>
-          <h1 className="text-[28px] font-black leading-8 text-slate-950">{product.name}</h1>
-          <p className="mt-1 font-bold text-slate-400">{product.unit}</p>
-          <div className="mt-3 flex items-end gap-2">
-            <span className="text-[34px] font-black leading-none text-slate-950">{currency(product.memberPrice)}</span>
-            <span className="pb-1 text-sm font-semibold text-slate-400 line-through">{currency(product.originalPrice)}</span>
-          </div>
+          <p className="mt-1.5 text-[13px] font-semibold text-savt-dark">Member price from nearest CKS</p>
+          <h1 className="mt-4 text-[21px] font-black leading-7 tracking-[-0.01em] text-slate-950">{product.name}</h1>
+          <p className="mt-1 text-[13px] font-semibold text-slate-500">{product.unit}</p>
         </div>
-        <p className="text-[15px] leading-6 text-slate-600">{product.description}</p>
-        <div className="grid grid-cols-2 gap-3">
-          <RewardMetric icon={<CoinIcon className="h-4 w-4" />} label="SAVT Points" value={`+${product.points}`} />
-          <RewardMetric icon={<PercentBadgeIcon className="h-4 w-4" />} label="Cashback" value={`${product.cashback}%`} />
+
+        <div className="flex flex-wrap gap-2">
+          <ValueTag tone="member">Member price</ValueTag>
+          <ValueTag tone="cashback">{product.cashback}% cashback</ValueTag>
+          <ValueTag tone="points">+{product.points} pts</ValueTag>
         </div>
-        <div className="flex gap-3 rounded-[24px] border border-emerald-100 bg-savt-light p-4">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-savt-dark shadow-sm">
+
+        <div className="flex items-center gap-3 border-y border-slate-100 py-4">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-savt-light text-savt-dark">
             <TruckIcon className="h-5 w-5" />
-          </span>
-          <div>
-            <p className="text-sm font-black text-savt-dark">Packed from your nearest CKS</p>
-            <p className="mt-1 text-xs font-semibold leading-5 text-emerald-700">No branch selection needed. SAVT assigns the closest branch automatically.</p>
           </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[14px] font-black text-slate-950">{branch.name}</p>
+            <p className="mt-0.5 text-[12px] font-semibold leading-4 text-slate-500">Nearest branch assigned automatically</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-savt-light px-3 py-1.5 text-[11px] font-black text-savt-dark">{branch.eta}</span>
         </div>
-        <SectionHeader title="Suggested products" />
-        <ProductGrid products={products.filter((item) => item.id !== product.id).slice(0, 2)} onProduct={onProduct} onAdd={onAdd} />
+
+        <div className="flex min-h-[58px] items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <p className="text-[14px] font-black text-slate-950">If unavailable</p>
+            <p className="mt-0.5 text-[12px] font-semibold text-slate-500">Remove item from basket</p>
+          </div>
+          <button className="min-h-11 rounded-full px-3 text-[13px] font-black text-savt-dark transition active:bg-savt-light">
+            Change
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-[15px] font-black text-slate-950">About this item</p>
+          <p className="text-[14px] leading-6 text-slate-600">{product.description}</p>
+        </div>
+
+        <div className="rounded-[20px] bg-[#F7FAF8] p-4">
+          <div className="flex items-center gap-2 text-savt-dark">
+            <ShieldIcon className="h-4 w-4" />
+            <p className="text-[13px] font-black">Fresh packed by CKS GO</p>
+          </div>
+          <p className="mt-1.5 text-[12px] font-semibold leading-5 text-slate-500">
+            Your order is picked from {branch.name}. Users can change delivery address, but store branch selection stays automatic.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <SectionHeader title="Suggested products" />
+          <ProductGrid products={suggestedProducts} onProduct={onProduct} onAdd={onAdd} />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function DetailStickyCta({
+  quantity,
+  total,
+  onDecrement,
+  onIncrement,
+  onClick
+}: {
+  quantity: number;
+  total: number;
+  onDecrement: () => void;
+  onIncrement: () => void;
+  onClick: () => void;
+}) {
+  return (
+    <div data-sticky-cta className="z-20 border-t border-slate-100 bg-white/95 px-4 pb-3 pt-2.5 shadow-nav backdrop-blur-xl">
+      <div className="flex items-center gap-3">
+        <div className="shrink-0">
+          <QuantitySelector quantity={quantity} onIncrement={onIncrement} onDecrement={onDecrement} />
+        </div>
+        <button
+          onClick={onClick}
+          className="flex min-h-[56px] flex-1 items-center justify-center rounded-[18px] bg-savt-green px-4 text-center text-white shadow-button transition active:scale-[0.99]"
+        >
+          <div>
+            <span className="block text-[15px] font-black">Add to cart</span>
+            <span className="block text-[11px] font-semibold text-emerald-50">{currency(total)}</span>
+          </div>
+        </button>
       </div>
-      <button onClick={() => onAdd(product)} className="sr-only">Add to cart</button>
     </div>
   );
 }
@@ -851,7 +942,7 @@ function SectionHeader({ title, action }: { title: string; action?: string }) {
 
 function ProductGrid({ products: items, onProduct, onAdd }: { products: Product[]; onProduct: (product: Product) => void; onAdd: (product: Product) => void }) {
   return (
-    <div className="grid grid-cols-2 gap-2.5">
+    <div className="grid grid-cols-2 gap-x-3 gap-y-5">
       {items.map((product) => (
         <ProductCard key={product.id} product={product} onOpen={onProduct} onAdd={onAdd} />
       ))}

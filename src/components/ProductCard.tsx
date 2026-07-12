@@ -12,27 +12,27 @@ export function ProductCard({ product, onOpen, onAdd }: ProductCardProps) {
   const savings = Math.max(0, product.originalPrice - product.memberPrice);
 
   return (
-    <article className="group relative min-h-[226px] rounded-[18px] bg-white/75 p-1.5 transition duration-200 active:scale-[0.985]">
+    <article className="group relative min-h-[232px] pb-2 transition duration-200 active:scale-[0.985]">
       <button onClick={() => onOpen(product)} className="block w-full text-left">
-        <div className={`relative grid h-[118px] place-items-center overflow-hidden rounded-[18px] bg-gradient-to-br ${product.color}`}>
-          <div className="absolute inset-x-5 bottom-2 h-4 rounded-full bg-slate-900/10 blur-sm" />
+        <div className="relative grid h-[136px] place-items-center overflow-hidden rounded-[20px] bg-white pb-6 pt-1 shadow-[0_10px_24px_rgba(15,23,42,0.045)] ring-1 ring-slate-100/70">
+          <div className="absolute inset-x-7 bottom-5 h-4 rounded-full bg-slate-900/10 blur-sm" />
           {product.badge && (
-            <span className="absolute left-2 top-2 z-10 max-w-[86px] truncate rounded-full bg-white/90 px-2 py-0.5 text-[8.5px] font-extrabold text-savt-dark shadow-sm backdrop-blur">
+            <span className="absolute left-2 top-2 z-30 max-w-[82px] truncate rounded-full bg-white/95 px-2 py-1 text-[7.5px] font-extrabold leading-none text-savt-dark shadow-[0_2px_8px_rgba(15,23,42,0.10)] ring-1 ring-emerald-100 backdrop-blur-sm">
               {product.badge}
             </span>
           )}
           <ProductVisual product={product} size="card" />
+          {savings > 0 && (
+            <div className="absolute inset-x-0 bottom-0 grid h-6 place-items-center bg-savt-green text-[10px] font-black text-white">
+              RM{savings.toFixed(2)} off
+            </div>
+          )}
         </div>
-        {savings > 0 && (
-          <div className="-mt-4 mb-2 grid h-[18px] place-items-center rounded-b-[18px] bg-savt-green text-[9.5px] font-black text-white">
-            RM{savings.toFixed(2)} off
-          </div>
-        )}
-        <div className="px-1.5">
-          <div className="mt-2 flex items-end gap-1.5">
+        <div className="px-0.5 pt-2.5">
+          <div className="flex items-end gap-1.5">
             <span className="pb-[1px] text-[10px] font-black leading-none text-slate-950">RM</span>
-            <span className="text-[16.5px] font-black leading-[18px] tracking-[-0.01em] text-slate-950">{product.memberPrice.toFixed(2)}</span>
-            <span className="pb-[1px] text-[10px] font-medium text-slate-400 line-through">
+            <span className="text-[17px] font-black leading-[18px] tracking-[-0.01em] text-slate-950">{product.memberPrice.toFixed(2)}</span>
+            <span className="pb-[1px] text-[10px] font-medium text-slate-400 line-through decoration-slate-300">
               {product.originalPrice.toFixed(2)}
             </span>
           </div>
@@ -40,18 +40,15 @@ export function ProductCard({ product, onOpen, onAdd }: ProductCardProps) {
             {product.name}
           </h3>
           <p className="mt-0.5 truncate text-[10.5px] font-medium leading-4 text-slate-500">{product.unit}</p>
-          <div className="mt-1.5 flex flex-wrap gap-1">
-            <ValueTag tone="points">+{product.points} pts</ValueTag>
-            <ValueTag tone="cashback">{product.cashback}% back</ValueTag>
-          </div>
+          <p className="mt-1 text-[9.5px] font-bold leading-3 text-savt-dark">+{product.points} pts / {product.cashback}% back</p>
         </div>
       </button>
       <button
         onClick={() => onAdd(product)}
-        className="absolute right-1.5 top-1.5 z-20 grid h-11 w-11 place-items-center rounded-full bg-savt-dark text-white shadow-button ring-4 ring-white/90 transition active:scale-95"
+        className="absolute right-2 top-2 z-20 grid h-[34px] w-[34px] place-items-center rounded-full bg-savt-dark text-white shadow-[0_8px_14px_rgba(22,163,74,0.18)] ring-2 ring-white/95 transition active:scale-95"
         aria-label={`Add ${product.name}`}
       >
-        <PlusIcon className="h-[18px] w-[18px]" />
+        <PlusIcon className="h-[15px] w-[15px]" />
       </button>
     </article>
   );
@@ -75,24 +72,24 @@ export function ValueTag({ children, tone }: { children: ReactNode; tone: "point
 }
 
 export function ProductVisual({ product, size = "detail" }: { product: Product; size?: "card" | "detail" | "cart" }) {
-  const scale = size === "detail" ? "h-40 w-40" : size === "cart" ? "h-16 w-16" : "h-[92px] w-[92px]";
-  const productScale = size === "detail" ? "scale-125" : size === "cart" ? "scale-75" : "scale-100";
+  const scale = size === "detail" ? "h-[278px] w-full" : size === "cart" ? "h-16 w-16" : "h-[108px] w-full";
+  const productScale = size === "detail" ? "scale-125" : size === "cart" ? "scale-75" : "scale-[1.12]";
   const imageClass =
     size === "detail"
-      ? "h-[168px] w-[168px] rounded-[34px]"
+      ? "h-[270px] w-full max-w-[380px]"
       : size === "cart"
         ? "h-[66px] w-[66px] rounded-[18px]"
-        : "h-[92px] w-[92px] rounded-[18px]";
+        : "h-[104px] w-full max-w-[154px]";
 
   if (product.imageUrl) {
     return (
       <div className={`relative grid ${scale} place-items-center`}>
-        <div className="absolute bottom-2 h-5 w-24 rounded-full bg-slate-950/10 blur-md" />
+        {size !== "detail" && <div className="absolute bottom-2 h-5 w-24 rounded-full bg-slate-950/10 blur-md" />}
         <img
           src={product.imageUrl}
           alt={product.name}
           loading="lazy"
-          className={`${imageClass} relative z-10 object-cover shadow-md ring-1 ring-white/80`}
+          className={`${imageClass} relative z-10 object-contain ${size === "cart" ? "p-1.5" : "p-0"}`}
         />
       </div>
     );
@@ -100,7 +97,7 @@ export function ProductVisual({ product, size = "detail" }: { product: Product; 
 
   return (
     <div className={`relative grid ${scale} place-items-center`}>
-      <div className="absolute bottom-2 h-5 w-24 rounded-full bg-slate-950/10 blur-md" />
+      {size !== "detail" && <div className="absolute bottom-2 h-5 w-24 rounded-full bg-slate-950/10 blur-md" />}
       <div className={`relative ${productScale}`}>
         {product.id === "grapes" && <GrapesVisual />}
         {product.id === "eggs" && <EggsVisual />}
